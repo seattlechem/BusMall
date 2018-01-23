@@ -127,8 +127,50 @@ function imgClickEvent(event){
   if(totalNumOfClicks > 2){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
+    sectionEl.innerHTML = '';
+    showResults();
   }
 
+}
+
+function showResults(){
+  //table, tr, th
+  var tableEl = document.createElement('table');
+  var trEl = document.createElement('tr');
+  var thEl1 = document.createElement('th');
+  var thEl2 = document.createElement('th');
+  var thEl3 = document.createElement('th');
+
+  thEl1.textContent = 'No.';
+  thEl2.textContent = 'Item Name';
+  thEl3.textContent = '# of Clicks';
+
+  trEl.appendChild(thEl1);
+  trEl.appendChild(thEl2);
+  trEl.appendChild(thEl3);
+  tableEl.appendChild(trEl);
+  sectionEl.appendChild(tableEl);
+
+  for(i in objStore){
+    trEl = document.createElement('tr');
+    var tdEl1 = document.createElement('td');
+    var tdEl2 = document.createElement('td');
+    var tdEl3 = document.createElement('td');
+    
+    tdEl1.textContent = i;
+    tdEl2.textContent = objStore[i].name;
+    tdEl3.textContent = objStore[i].numClicked;
+
+    trEl.appendChild(tdEl1);
+    trEl.appendChild(tdEl2);
+    trEl.appendChild(tdEl3);
+
+    tableEl.appendChild(trEl);
+    sectionEl.appendChild(tableEl);
+
+
+  }
+  //tr, td
 }
 
 //after 25 clicks, turn off event listeners on the images
