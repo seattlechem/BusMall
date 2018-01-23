@@ -4,12 +4,12 @@ var prevNum = [];
 var currNum = [];
 var objStore = [];
 var isSame = false;
-var section = document.getElementById('pictureContainer');
+var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
+var totalNumOfClicks = 0;
 
-// var section = document.getElementById('pictureContainer');
 
 var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
@@ -31,8 +31,8 @@ for(var i = 0; i < stockImages.length; i++){
 
 function pickInitialNum(){
   isSame = false;
-  var randomNum = Math.floor(Math.random() * stockImages.length);
   while(isSame === false){
+    var randomNum = Math.floor(Math.random() * stockImages.length);
     if(currNum.includes(randomNum) === false){
       currNum.push(randomNum);
       isSame = true;
@@ -45,6 +45,8 @@ function pickInitialNum(){
 function compare(num){
   if(prevNum.includes(num) === false && currNum.includes(num) === false){
     currNum.push(num);
+    objStore[num].numDisplayed += 1;
+
     isSame = true;
   }else{
     isSame = false;
@@ -87,22 +89,24 @@ function tranCurrToPrev(){
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
   imgEl1.src = objStore[prevNum[0]].filepath;
+  imgEl1.alt = objStore[prevNum[0]].name;
   imgEl2.src = objStore[prevNum[1]].filepath;
+  imgEl2.alt = objStore[prevNum[1]].name;
   imgEl3.src = objStore[prevNum[2]].filepath;
+  imgEl3.alt = objStore[prevNum[2]].name;
 }
 
 for(i = 0; i < 3; i++){
   pickInitialNum();
 }
-console.log(currNum);
+
 tranCurrToPrev();
-console.log(prevNum);
+
 setImgFilepath();
 // console.log(prevNum);
 
-imgEl1.addEventListener('click', imgClickEvent);
-imgEl2.addEventListener('click', imgClickEvent);
-imgEl3.addEventListener('click', imgClickEvent);
+//only 1 eventlistener
+sectionEl.addEventListener('click', imgClickEvent);
 
 function imgClickEvent(event){
   event.preventDefault();
@@ -112,8 +116,22 @@ function imgClickEvent(event){
   tranCurrToPrev();
   // section.innerHTML = '';
   setImgFilepath();
+  totalNumOfClicks += 1;
+
+  for(i = 0; i < objStore.length; i++){
+    if(event.target.alt === objStore[i].name){
+      objStore[i].numClicked += 1;
+    }
+  }
+
+  if(totalNumOfClicks > 2){
+    sectionEl.removeEventListener('click', imgClickEvent);
+    console.log('reached 25 clicks');
+  }
 
 }
+
+//after 25 clicks, turn off event listeners on the images
 
 // function pickRandomNum(){
 //   isSame = false;
