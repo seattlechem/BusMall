@@ -20,6 +20,7 @@ section {
 
 section img {
   display: inline-block;
+  height: 250px;
   width: 250px;
 }
 
