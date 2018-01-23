@@ -9,6 +9,7 @@ var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
 var totalNumOfClicks = 0;
+var percentClickPerItemArray = [];
 
 
 var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
@@ -128,12 +129,13 @@ function imgClickEvent(event){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
-    showResults();
+    showTable();
+    percetClickPerItem;
   }
 
 }
 
-function showResults(){
+function showTable(){
   //table, tr, th
   var tableEl = document.createElement('table');
   var trEl = document.createElement('tr');
@@ -177,6 +179,31 @@ function showResults(){
 
   }
   //tr, td
+}
+
+function percetClickPerItem(){
+  for(i in objStore){
+    var calc = objStore[i].numClicked / totalNumOfClicks * 100;
+    percentClickPerItemArray.push(calc);
+
+  }
+}
+
+function showChart(){
+  var canvasEl = document.createElement('canvas').getContext('2d');
+
+  var itemChart = new Chart(canvasEl, {
+    type: 'bar',
+    data: {
+      labels: stockImages,
+      datasets: [{
+        label: 'Percentage of Clicks Per Item', //chart title
+        data: percentClickPerItemArray,
+      }]
+    }
+  });
+
+
 }
 
 //after 25 clicks, turn off event listeners on the images
