@@ -1,5 +1,6 @@
 body {
   width: 960px;
+  background-color: #ebeced;
 }
 
 header {
@@ -11,4 +12,49 @@ header h1 {
   font-family: 'Bangers', cursive;
   font-size: 48px;
   text-align: center;
+}
+section {
+  width: 90%;
+  margin: 5% 10% 5% 10%;
+}
+
+section img {
+  display: inline-block;
+  height: 250px;
+  width: 250px;
+}
+
+table {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  margin: 0 0 0 10%;
+  padding: 0;
+  width: 70%;
+  min-width: 60%;
+  table-layout: fixed;
+}
+table caption {
+  font-size: 1.5em;
+  margin: .5em 0 .75em;
+}
+table tr {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: .25em;
+}
+table th, table td {
+  padding: .625em;
+  text-align: center;
+}
+
+table th {
+  font-size: .85em;
+  font-weight: bold;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+/* select all tr child elements */
+tr *:first-child {
+  width: 12%;
+  font-weight: bold;
 }

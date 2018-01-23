@@ -4,14 +4,14 @@ var prevNum = [];
 var currNum = [];
 var objStore = [];
 var isSame = false;
-var section = document.getElementById('pictureContainer');
+var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
+var totalNumOfClicks = 0;
 
-// var section = document.getElementById('pictureContainer');
 
-var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb.gif', 'water-can', 'wine-glass'];
+var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
 //Item Object constructor
 function Item(name, filepath, id){
@@ -26,74 +26,38 @@ function Item(name, filepath, id){
 //using for loop create 20 objects
 for(var i = 0; i < stockImages.length; i++){
   var filepath = 'img/' + stockImages[i] + '.jpg';
-  console.log(filepath);
   new Item(stockImages[i], filepath, i);
-  console.log(objStore);
 }
-console.log('objects are created');
-console.log(Item);
 
+function pickInitialNum(){
+  isSame = false;
+  while(isSame === false){
+    var randomNum = Math.floor(Math.random() * stockImages.length);
+    if(currNum.includes(randomNum) === false){
+      currNum.push(randomNum);
+      isSame = true;
+    }
+  }
+}
+//the current isSame is false
 
 //compare function
 function compare(num){
-  for(var i = 0; i < 3; i++){
-    if(prevNum[i] === num){
-      break;
-    }
-  }
-  if(i === 3){
-    //no match is found prevNum, then try currNum
-    for(i = 0; i < 3; i++){
-      if(currNum[i] === num){
-        break;
-      }
-    }
-    if(i === 3){
-      //no match is found even in currNum, then push to currNum
-      currNum.push(num);
-      isSame = true;
-    }
+  if(prevNum.includes(num) === false && currNum.includes(num) === false){
+    currNum.push(num);
+    objStore[num].numDisplayed += 1;
 
+    isSame = true;
+  }else{
+    isSame = false;
   }
-  console.log('isSame value after exiting compare function: ' + isSame);
 }
 
 //Pick three images at first initially
 //pick first initial num
-function pickInitialNums(){
-  var randomNum = Math.floor(Math.random() * stockImages.length);
-  currNum.push(randomNum);
-  isSame = true;
-  console.log('first initial num: ' + currNum);
-  console.log('the current isSame value: ' + isSame);
-
-  //pick 2nd initial num
-  while(isSame === true){
-    randomNum = Math.floor(Math.random() * stockImages.length);
-    if(currNum[0] !== randomNum){
-      isSame = false;
-      currNum.push(randomNum);
-    }
-  }
-  //reset isSame
-  isSame = true;
-  console.log('2nd initial num: ' + currNum);
-  //reset isSame to true
-
-  //pick 3rd initial num
-  if(isSame === true){
-    randomNum = Math.floor(Math.random() * stockImages.length);
-    if(currNum[0] !== randomNum && currNum[1] !== randomNum){
-      isSame = false;
-      currNum.push(randomNum);
-    }
-  }
-  console.log('3rd initial num: ' + currNum);
-  console.log('isSame value after finishing picking initial numbers: ' + isSame);
-  //the current isSame is false
-}
 
 function pickRandomNum(){
+  isSame = false;
   while(isSame === false){
     var randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
@@ -108,59 +72,125 @@ function pickRandomNum(){
     randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
+  console.log(currNum);
 }
+
 //assigning currNum to prevNum
 function tranCurrToPrev(){
   for(i = 0; i < 3; i++){
     prevNum[i] = currNum[i];
   }
-  currNum = [];
+  if(i === 3){
+    currNum = [];
+  }
+
 }
 
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
   imgEl1.src = objStore[prevNum[0]].filepath;
+  imgEl1.alt = objStore[prevNum[0]].name;
   imgEl2.src = objStore[prevNum[1]].filepath;
+  imgEl2.alt = objStore[prevNum[1]].name;
   imgEl3.src = objStore[prevNum[2]].filepath;
+  imgEl3.alt = objStore[prevNum[2]].name;
 }
 
-pickInitialNums();
+for(i = 0; i < 3; i++){
+  pickInitialNum();
+}
+
 tranCurrToPrev();
-console.log('1st prevNum: ' + prevNum);
-console.log(currNum); //empty bc nums were transferred
+
 setImgFilepath();
-console.log(Item);
+// console.log(prevNum);
 
-imgEl1.addEventListener('click', imgClickEvent());
-console.log(imgEl1);
-imgEl2.addEventListener('click', imgClickEvent());
-imgEl3.addEventListener('click', imgClickEvent());
+//only 1 eventlistener
+sectionEl.addEventListener('click', imgClickEvent);
 
-function imgClickEvent(){
+function imgClickEvent(event){
+  event.preventDefault();
 
   pickRandomNum();
 
   tranCurrToPrev();
   // section.innerHTML = '';
   setImgFilepath();
+  totalNumOfClicks += 1;
+
+  for(i = 0; i < objStore.length; i++){
+    if(event.target.alt === objStore[i].name){
+      objStore[i].numClicked += 1;
+    }
+  }
+
+  if(totalNumOfClicks > 24){
+    sectionEl.removeEventListener('click', imgClickEvent);
+    console.log('reached 25 clicks');
+    sectionEl.innerHTML = '';
+    showResults();
+  }
 
 }
 
-//click event
+function showResults(){
+  //table, tr, th
+  var tableEl = document.createElement('table');
+  var trEl = document.createElement('tr');
+  var thEl1 = document.createElement('th');
+  var thEl2 = document.createElement('th');
+  var thEl3 = document.createElement('th');
+
+  thEl1.textContent = 'No.';
+  thEl2.textContent = 'Item Name';
+  thEl3.textContent = '% of Clicks';
+
+  trEl.appendChild(thEl1);
+  trEl.appendChild(thEl2);
+  trEl.appendChild(thEl3);
+  tableEl.appendChild(trEl);
+  sectionEl.appendChild(tableEl);
+
+  for(i in objStore){
+    trEl = document.createElement('tr');
+    var tdEl1 = document.createElement('td');
+    var tdEl2 = document.createElement('td');
+    var tdEl3 = document.createElement('td');
+
+    tdEl1.textContent = i;
+    tdEl2.textContent = objStore[i].name;
+    var percentageOfClicks = (objStore[i].numClicked) / (totalNumOfClicks) * 100;
+    if(percentageOfClicks === 0){
+      tdEl3.textContent = percentageOfClicks;
+    }
+    else{
+      tdEl3.textContent = percentageOfClicks.toFixed(2) + '%';
+    }
+
+    trEl.appendChild(tdEl1);
+    trEl.appendChild(tdEl2);
+    trEl.appendChild(tdEl3);
+
+    tableEl.appendChild(trEl);
+    sectionEl.appendChild(tableEl);
 
 
-//pick random 3 numbers
+  }
+  //tr, td
+}
 
-// pickRandomNum();
-// console.log('pick random: ' + currNum);
+//after 25 clicks, turn off event listeners on the images
 
-// tranCurrToPrev();
-// console.log('current num ' + currNum);
-// console.log('previous num ' + prevNum);
+// function pickRandomNum(){
+//   isSame = false;
+//   for(i = 0; i < 3; i++){
+//     while(isSame === false){
+//       var randomNum = Math.floor(Math.random() * stockImages.length);
+//       compare(randomNum);
+//     }
 
-// console.log(objStore[prevNum[0]]);
-// setImgFilepath();
-
+//   }
+// }
 
 
 
