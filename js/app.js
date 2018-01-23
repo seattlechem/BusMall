@@ -2,6 +2,7 @@
 
 var prevNum = [];
 var currNum = [];
+var objStore = [];
 var isSame = false;
 var section = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
@@ -19,36 +20,42 @@ function Item(name, filepath, id){
   this.id = id;
   this.numDisplayed = 0;
   this.numClicked = 0;
-  currNum.push(this);
+  objStore.push(this);
 }
 
 //using for loop create 20 objects
 for(var i = 0; i < stockImages.length; i++){
   var filepath = 'img/' + stockImages[i] + '.jpg';
+  console.log(filepath);
   new Item(stockImages[i], filepath, i);
+  console.log(objStore);
 }
+console.log('objects are created');
+console.log(Item);
 
 
 //compare function
 function compare(num){
   for(var i = 0; i < 3; i++){
-    if (prevNum[i] === num){
-      isSame = true;
+    if(prevNum[i] === num){
+      break;
     }
   }
-  if (i === 3){
+  if(i === 3){
     //no match is found prevNum, then try currNum
-    for (i = 0; i < 3; i++){
-      if (currNum[i] === num){
-        isSame = true;
+    for(i = 0; i < 3; i++){
+      if(currNum[i] === num){
+        break;
       }
     }
-    if (i === 3){
+    if(i === 3){
       //no match is found even in currNum, then push to currNum
       currNum.push(num);
+      isSame = true;
     }
 
   }
+  console.log('isSame value after exiting compare function: ' + isSame);
 }
 
 //Pick three images at first initially
@@ -56,30 +63,55 @@ function compare(num){
 function pickInitialNums(){
   var randomNum = Math.floor(Math.random() * stockImages.length);
   currNum.push(randomNum);
+  isSame = true;
+  console.log('first initial num: ' + currNum);
+  console.log('the current isSame value: ' + isSame);
 
   //pick 2nd initial num
-  while (isSame === false){
+  while(isSame === true){
     randomNum = Math.floor(Math.random() * stockImages.length);
-    compare(randomNum);
+    if(currNum[0] !== randomNum){
+      isSame = false;
+      currNum.push(randomNum);
+    }
   }
+  //reset isSame
+  isSame = true;
+  console.log('2nd initial num: ' + currNum);
+  //reset isSame to true
 
   //pick 3rd initial num
-  while (isSame === false){
+  if(isSame === true){
     randomNum = Math.floor(Math.random() * stockImages.length);
-    compare(randomNum);
+    if(currNum[0] !== randomNum && currNum[1] !== randomNum){
+      isSame = false;
+      currNum.push(randomNum);
+    }
   }
-
+  console.log('3rd initial num: ' + currNum);
+  console.log('isSame value after finishing picking initial numbers: ' + isSame);
+  //the current isSame is false
 }
 
 function pickRandomNum(){
-  while (isSame === false){
+  while(isSame === false){
     var randomNum = Math.floor(Math.random() * stockImages.length);
+    compare(randomNum);
+  }
+  isSame = false;
+  while(isSame === false){
+    randomNum = Math.floor(Math.random() * stockImages.length);
+    compare(randomNum);
+  }
+  isSame = false;
+  while(isSame === false){
+    randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
 }
 //assigning currNum to prevNum
 function tranCurrToPrev(){
-  for (i = 0; i < 3; i++){
+  for(i = 0; i < 3; i++){
     prevNum[i] = currNum[i];
   }
   currNum = [];
@@ -87,37 +119,47 @@ function tranCurrToPrev(){
 
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
-  imgEl1.src = Item[prevNum[0]].filepath;
-  imgEl2.src = Item[prevNum[1]].filepath;
-  imgEl3.src = Item[prevNum[2]].filepath;
+  imgEl1.src = objStore[prevNum[0]].filepath;
+  imgEl2.src = objStore[prevNum[1]].filepath;
+  imgEl3.src = objStore[prevNum[2]].filepath;
 }
 
+pickInitialNums();
+tranCurrToPrev();
+console.log('1st prevNum: ' + prevNum);
+console.log(currNum); //empty bc nums were transferred
+setImgFilepath();
+console.log(Item);
+
+imgEl1.addEventListener('click', imgClickEvent());
+console.log(imgEl1);
+imgEl2.addEventListener('click', imgClickEvent());
+imgEl3.addEventListener('click', imgClickEvent());
+
 function imgClickEvent(){
-  for (i = 0; i < 3; i++){
-    pickRandomNum();
-  }
+
+  pickRandomNum();
 
   tranCurrToPrev();
-  section.innerHTML = '';
+  // section.innerHTML = '';
   setImgFilepath();
 
 }
 
 //click event
-imgEl1.addEventListener('click', imgClickEvent());
 
 
+//pick random 3 numbers
 
+// pickRandomNum();
+// console.log('pick random: ' + currNum);
 
+// tranCurrToPrev();
+// console.log('current num ' + currNum);
+// console.log('previous num ' + prevNum);
 
-
-
-
-
-
-pickInitialNums();
-tranCurrToPrev();
-setImgFilepath();
+// console.log(objStore[prevNum[0]]);
+// setImgFilepath();
 
 
 
