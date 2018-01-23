@@ -124,7 +124,7 @@ function imgClickEvent(event){
     }
   }
 
-  if(totalNumOfClicks > 2){
+  if(totalNumOfClicks > 24){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
@@ -143,7 +143,7 @@ function showResults(){
 
   thEl1.textContent = 'No.';
   thEl2.textContent = 'Item Name';
-  thEl3.textContent = '# of Clicks';
+  thEl3.textContent = '% of Clicks';
 
   trEl.appendChild(thEl1);
   trEl.appendChild(thEl2);
@@ -156,10 +156,16 @@ function showResults(){
     var tdEl1 = document.createElement('td');
     var tdEl2 = document.createElement('td');
     var tdEl3 = document.createElement('td');
-    
+
     tdEl1.textContent = i;
     tdEl2.textContent = objStore[i].name;
-    tdEl3.textContent = objStore[i].numClicked;
+    var percentageOfClicks = (objStore[i].numClicked) / (totalNumOfClicks) * 100;
+    if(percentageOfClicks === 0){
+      tdEl3.textContent = percentageOfClicks;
+    }
+    else{
+      tdEl3.textContent = percentageOfClicks.toFixed(2) + '%';
+    }
 
     trEl.appendChild(tdEl1);
     trEl.appendChild(tdEl2);
