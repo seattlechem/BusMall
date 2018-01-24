@@ -27,14 +27,14 @@ function Item(name, filepath, id){
 //
 function creatingObjets(){
   //using for loop create 20 objects
-  for(var i = 0; i < stockImages.length; i++){
+  for(var i in stockImages){
     var filepath = 'img/' + stockImages[i] + '.jpg';
     new Item(stockImages[i], filepath, i);
   }
 }
 
 function pickInitialNum(){
-  for(i = 0; i < 3; i++){
+  for(var i = 0; i < 3; i++){
     isSame = false;
     while(isSame === false){
       var randomNum = Math.floor(Math.random() * stockImages.length);
@@ -123,17 +123,17 @@ function imgClickEvent(event){
   setImgFilepath();
   totalNumOfClicks += 1;
   applyEachImgCount();
-  
-  if(totalNumOfClicks > 24){
+
+  if(totalNumOfClicks > 3){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
-    // showTable();
     percetClickPerItem();
+    showTable();
     showChart();
     // displayResetBtn();
   }
-  
+
 }
 
 function applyEachImgCount(){
@@ -162,7 +162,7 @@ function showTable(){
   tableEl.appendChild(trEl);
   sectionEl.appendChild(tableEl);
 
-  for(i in objStore){
+  for(var i in objStore){
     trEl = document.createElement('tr');
     var tdEl1 = document.createElement('td');
     var tdEl2 = document.createElement('td');
