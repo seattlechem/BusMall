@@ -24,22 +24,28 @@ function Item(name, filepath, id){
   objStore.push(this);
 }
 
-//using for loop create 20 objects
-for(var i = 0; i < stockImages.length; i++){
-  var filepath = 'img/' + stockImages[i] + '.jpg';
-  new Item(stockImages[i], filepath, i);
+//
+function creatingObjets(){
+  //using for loop create 20 objects
+  for(var i = 0; i < stockImages.length; i++){
+    var filepath = 'img/' + stockImages[i] + '.jpg';
+    new Item(stockImages[i], filepath, i);
+  }
 }
 
 function pickInitialNum(){
-  isSame = false;
-  while(isSame === false){
-    var randomNum = Math.floor(Math.random() * stockImages.length);
-    if(currNum.includes(randomNum) === false){
-      currNum.push(randomNum);
-      isSame = true;
+  for(i = 0; i < 3; i++){
+    isSame = false;
+    while(isSame === false){
+      var randomNum = Math.floor(Math.random() * stockImages.length);
+      if(currNum.includes(randomNum) === false){
+        currNum.push(randomNum);
+        isSame = true;
+      }
     }
   }
 }
+
 //the current isSame is false
 
 //compare function
@@ -78,7 +84,7 @@ function pickRandomNum(){
 
 //assigning currNum to prevNum
 function tranCurrToPrev(){
-  for(i = 0; i < 3; i++){
+  for(var i = 0; i < 3; i++){
     prevNum[i] = currNum[i];
   }
   if(i === 3){
@@ -97,43 +103,45 @@ function setImgFilepath(){
   imgEl3.alt = objStore[prevNum[2]].name;
 }
 
-for(i = 0; i < 3; i++){
-  pickInitialNum();
+function initialLoading(){
+  creatingObjets();
+  pickRandomNum();
+  tranCurrToPrev();
+  setImgFilepath();
 }
 
-tranCurrToPrev();
 
-setImgFilepath();
-// console.log(prevNum);
-
-//only 1 eventlistener
-sectionEl.addEventListener('click', imgClickEvent);
+function addEventListenerToSection(){
+  //only 1 eventlistener
+  sectionEl.addEventListener('click', imgClickEvent);
+}
 
 function imgClickEvent(event){
-  event.preventDefault();
 
   pickRandomNum();
-
   tranCurrToPrev();
-  // section.innerHTML = '';
   setImgFilepath();
   totalNumOfClicks += 1;
-
-  for(i = 0; i < objStore.length; i++){
-    if(event.target.alt === objStore[i].name){
-      objStore[i].numClicked += 1;
-    }
-  }
-
-  if(totalNumOfClicks > 5){
+  applyEachImgCount();
+  
+  if(totalNumOfClicks > 24){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
     // showTable();
     percetClickPerItem();
     showChart();
+    // displayResetBtn();
   }
+  
+}
 
+function applyEachImgCount(){
+  for(var i = 0; i < objStore.length; i++){
+    if(event.target.alt === objStore[i].name){
+      objStore[i].numClicked += 1;
+    }
+  }
 }
 
 function showTable(){
@@ -183,7 +191,7 @@ function showTable(){
 }
 
 function percetClickPerItem(){
-  for(i in objStore){
+  for(var i in objStore){
     var calc = objStore[i].numClicked / totalNumOfClicks * 100;
     percentClickPerItemArray.push(calc);
     console.log(calc);
@@ -236,18 +244,55 @@ function showChart(){
 
 }
 
-//after 25 clicks, turn off event listeners on the images
+function displayResetBtn(){
+  var resetBtn = document.createElement('button');
+  resetBtn.innerHTML = 'Try Again';
+  resetBtn.onclick = reset();
+  sectionEl.appendChild(resetBtn);
+}
 
-// function pickRandomNum(){
-//   isSame = false;
-//   for(i = 0; i < 3; i++){
-//     while(isSame === false){
-//       var randomNum = Math.floor(Math.random() * stockImages.length);
-//       compare(randomNum);
-//     }
+function reset(){
+  sectionEl.innerHTML = '';
+  var imageEl1 = document.createElement('img');
+  imageEl1.id = 'image1';
 
-//   }
-// }
+  var imageEl2 = document.createElement('img');
+  imageEl2.id = 'image1';
+
+  var imageEl3 = document.createElement('img');
+  imageEl3.id = 'image1';
+
+
+
+  pickRandomNum();
+  tranCurrToPrev();
+
+  setImgFilepath();
+  totalNumOfClicks += 1;
+
+  // for(i = 0; i < objStore.length; i++){
+  //   if(event.target.alt === objStore[i].name){
+  //     objStore[i].numClicked += 1;
+  //   }
+  // }
+
+  // if(totalNumOfClicks > 5){
+  //   sectionEl.removeEventListener('click', imgClickEvent);
+  //   console.log('reached 25 clicks');
+  //   sectionEl.innerHTML = '';
+  //   // showTable();
+  //   percetClickPerItem();
+  //   showChart();
+  //   displayResetBtn();
+  // }
+
+}
+
+initialLoading();
+addEventListenerToSection();
+
+
+
 
 
 

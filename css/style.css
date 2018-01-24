@@ -58,3 +58,8 @@ tr *:first-child {
   width: 12%;
   font-weight: bold;
 }
+
+button {
+  font-size: 24px;
+  padding: 1% 1%;
+}
