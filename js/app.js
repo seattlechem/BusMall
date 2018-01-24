@@ -1,9 +1,9 @@
 'use strict';
 
-var prevNum = [];
-var currNum = [];
-var objStore = [];
-var isSame = false;
+Item.prevNum = [];
+Item.currNum = [];
+Item.objStore = [];
+Item.isSame = false;
 var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
@@ -21,7 +21,7 @@ function Item(name, filepath, id){
   this.id = id;
   this.numDisplayed = 0;
   this.numClicked = 0;
-  objStore.push(this);
+  Item.objStore.push(this);
 }
 
 //
@@ -35,28 +35,27 @@ function creatingObjets(){
 
 function pickInitialNum(){
   for(var i = 0; i < 3; i++){
-    isSame = false;
-    while(isSame === false){
+    Item.isSame = false;
+    while(Item.isSame === false){
       var randomNum = Math.floor(Math.random() * stockImages.length);
-      if(currNum.includes(randomNum) === false){
-        currNum.push(randomNum);
-        isSame = true;
+      if(Item.currNum.includes(randomNum) === false){
+        Item.currNum.push(randomNum);
+        Item.isSame = true;
       }
     }
   }
 }
 
-//the current isSame is false
+//the current Item.isSame is false
 
 //compare function
 function compare(num){
-  if(prevNum.includes(num) === false && currNum.includes(num) === false){
-    currNum.push(num);
-    objStore[num].numDisplayed += 1;
-
-    isSame = true;
+  if(Item.prevNum.includes(num) === false && Item.currNum.includes(num) === false){
+    Item.currNum.push(num);
+    Item.objStore[num].numDisplayed += 1;
+    Item.isSame = true;
   }else{
-    isSame = false;
+    Item.isSame = false;
   }
 }
 
@@ -64,43 +63,43 @@ function compare(num){
 //pick first initial num
 
 function pickRandomNum(){
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     var randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  console.log(currNum);
+  console.log(Item.currNum);
 }
 
-//assigning currNum to prevNum
+//assigning Item.currNumItem.prevNum
 function tranCurrToPrev(){
   for(var i = 0; i < 3; i++){
-    prevNum[i] = currNum[i];
+    Item.prevNum[i] = Item.currNum[i];
   }
   if(i === 3){
-    currNum = [];
+    Item.currNum = [];
   }
 
 }
 
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
-  imgEl1.src = objStore[prevNum[0]].filepath;
-  imgEl1.alt = objStore[prevNum[0]].name;
-  imgEl2.src = objStore[prevNum[1]].filepath;
-  imgEl2.alt = objStore[prevNum[1]].name;
-  imgEl3.src = objStore[prevNum[2]].filepath;
-  imgEl3.alt = objStore[prevNum[2]].name;
+  imgEl1.src = Item.objStore[Item.prevNum[0]].filepath;
+  imgEl1.alt = Item.objStore[Item.prevNum[0]].name;
+  imgEl2.src = Item.objStore[Item.prevNum[1]].filepath;
+  imgEl2.alt = Item.objStore[Item.prevNum[1]].name;
+  imgEl3.src = Item.objStore[Item.prevNum[2]].filepath;
+  imgEl3.alt = Item.objStore[Item.prevNum[2]].name;
 }
 
 function initialLoading(){
@@ -137,9 +136,9 @@ function imgClickEvent(event){
 }
 
 function applyEachImgCount(){
-  for(var i = 0; i < objStore.length; i++){
-    if(event.target.alt === objStore[i].name){
-      objStore[i].numClicked += 1;
+  for(var i = 0; i < Item.objStore.length; i++){
+    if(event.target.alt === Item.objStore[i].name){
+      Item.objStore[i].numClicked += 1;
     }
   }
 }
@@ -162,15 +161,15 @@ function showTable(){
   tableEl.appendChild(trEl);
   sectionEl.appendChild(tableEl);
 
-  for(var i in objStore){
+  for(var i in Item.objStore){
     trEl = document.createElement('tr');
     var tdEl1 = document.createElement('td');
     var tdEl2 = document.createElement('td');
     var tdEl3 = document.createElement('td');
 
     tdEl1.textContent = i;
-    tdEl2.textContent = objStore[i].name;
-    var percentageOfClicks = (objStore[i].numClicked) / (totalNumOfClicks) * 100;
+    tdEl2.textContent = Item.objStore[i].name;
+    var percentageOfClicks = (Item.objStore[i].numClicked) / (totalNumOfClicks) * 100;
     if(percentageOfClicks === 0){
       tdEl3.textContent = percentageOfClicks;
     }
@@ -191,8 +190,8 @@ function showTable(){
 }
 
 function percetClickPerItem(){
-  for(var i in objStore){
-    var calc = objStore[i].numClicked / totalNumOfClicks * 100;
+  for(var i in Item.objStore){
+    var calc = Item.objStore[i].numClicked / totalNumOfClicks * 100;
     percentClickPerItemArray.push(calc);
     console.log(calc);
 
@@ -269,22 +268,6 @@ function reset(){
 
   setImgFilepath();
   totalNumOfClicks += 1;
-
-  // for(i = 0; i < objStore.length; i++){
-  //   if(event.target.alt === objStore[i].name){
-  //     objStore[i].numClicked += 1;
-  //   }
-  // }
-
-  // if(totalNumOfClicks > 5){
-  //   sectionEl.removeEventListener('click', imgClickEvent);
-  //   console.log('reached 25 clicks');
-  //   sectionEl.innerHTML = '';
-  //   // showTable();
-  //   percetClickPerItem();
-  //   showChart();
-  //   displayResetBtn();
-  // }
 
 }
 
