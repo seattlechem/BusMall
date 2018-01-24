@@ -8,7 +8,7 @@ var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
-var totalNumOfClicks = 0;
+Item.totalNumOfClicks = 0;
 var percentClickPerItemArray = [];
 
 
@@ -33,20 +33,6 @@ function creatingObjets(){
   }
 }
 
-function pickInitialNum(){
-  for(var i = 0; i < 3; i++){
-    Item.isSame = false;
-    while(Item.isSame === false){
-      var randomNum = Math.floor(Math.random() * stockImages.length);
-      if(Item.currNum.includes(randomNum) === false){
-        Item.currNum.push(randomNum);
-        Item.isSame = true;
-      }
-    }
-  }
-}
-
-//the current Item.isSame is false
 
 //compare function
 function compare(num){
@@ -120,10 +106,10 @@ function imgClickEvent(event){
   pickRandomNum();
   tranCurrToPrev();
   setImgFilepath();
-  totalNumOfClicks += 1;
+  Item.totalNumOfClicks += 1;
   applyEachImgCount();
 
-  if(totalNumOfClicks > 3){
+  if(Item.totalNumOfClicks > 3){
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
@@ -169,7 +155,7 @@ function showTable(){
 
     tdEl1.textContent = i;
     tdEl2.textContent = Item.objStore[i].name;
-    var percentageOfClicks = (Item.objStore[i].numClicked) / (totalNumOfClicks) * 100;
+    var percentageOfClicks = (Item.objStore[i].numClicked) / (Item.totalNumOfClicks) * 100;
     if(percentageOfClicks === 0){
       tdEl3.textContent = percentageOfClicks;
     }
@@ -191,7 +177,7 @@ function showTable(){
 
 function percetClickPerItem(){
   for(var i in Item.objStore){
-    var calc = Item.objStore[i].numClicked / totalNumOfClicks * 100;
+    var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
     percentClickPerItemArray.push(calc);
     console.log(calc);
 
@@ -267,7 +253,7 @@ function reset(){
   tranCurrToPrev();
 
   setImgFilepath();
-  totalNumOfClicks += 1;
+  Item.totalNumOfClicks += 1;
 
 }
 
