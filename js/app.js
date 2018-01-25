@@ -1,16 +1,22 @@
 'use strict';
 
+
 Item.prevNum = [];
 Item.currNum = [];
 Item.objStore = [];
+Item.cumulativeObjStore = [];
 Item.isSame = false;
 var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
 Item.totalNumOfClicks = 0;
+Item.cumulativeTotalNumOfClicks = 0;
 var percentClickPerItemArray = [];
 
+if(localStorage.getItem('storedItem')){
+  retrieveData();
+}
 
 var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
@@ -107,21 +113,23 @@ function imgClickEvent(event){
   tranCurrToPrev();
   setImgFilepath();
   Item.totalNumOfClicks += 1;
-  applyEachImgCount();
+  applyEachImgCount(event);
 
   if(Item.totalNumOfClicks > 3){
+    storeData();
+    console.log('storeData invoked');
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
     percetClickPerItem();
-    showTable();
+    // showTable();
     showChart();
-    // displayResetBtn();
+    displayResetBtn();
   }
 
 }
 
-function applyEachImgCount(){
+function applyEachImgCount(event){
   for(var i = 0; i < Item.objStore.length; i++){
     if(event.target.alt === Item.objStore[i].name){
       Item.objStore[i].numClicked += 1;
@@ -176,13 +184,20 @@ function showTable(){
 }
 
 function percetClickPerItem(){
-  for(var i in Item.objStore){
-    var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
-    percentClickPerItemArray.push(calc);
-    console.log(calc);
-
+  if(Item.cumulativeObjStore.length === 0 & Item.cumulativeTotalNumOfClicks === 0){
+    for(var i in Item.objStore){
+      var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
+      percentClickPerItemArray.push(calc);
+    }
+  }else{
+    for(i in Item.objStore){
+      calc = Item.cumulativeObjStore[i].numClicked / Item.cumulativeTotalNumOfClicks * 100;
+      percentClickPerItemArray.push(calc);
+    }
   }
+
 }
+
 
 function showChart(){
   var canvasEl = document.createElement('canvas');
@@ -232,30 +247,57 @@ function showChart(){
 function displayResetBtn(){
   var resetBtn = document.createElement('button');
   resetBtn.innerHTML = 'Try Again';
-  resetBtn.onclick = reset();
+  resetBtn.addEventListener('click', reset);
   sectionEl.appendChild(resetBtn);
 }
 
 function reset(){
-  sectionEl.innerHTML = '';
-  var imageEl1 = document.createElement('img');
-  imageEl1.id = 'image1';
+  console.log('reset');
 
-  var imageEl2 = document.createElement('img');
-  imageEl2.id = 'image1';
-
-  var imageEl3 = document.createElement('img');
-  imageEl3.id = 'image1';
-
-
-
-  pickRandomNum();
-  tranCurrToPrev();
-
-  setImgFilepath();
-  Item.totalNumOfClicks += 1;
-
+  location.reload();
 }
+
+function retrieveData(){
+  Item.cumulativeObjStore = JSON.parse(localStorage.getItem('storedItem'));
+  console.log('Hello retrievedata');
+  Item.cumulativeTotalNumOfClicks = JSON.parse(localStorage.getItem('storedTotalClicks'));
+
+  // localStorage.clear('storedItem');
+  // localStorage.clear('storedTotalClicks');
+
+  // sectionEl.innerHTML = '';
+
+  // imgEl1 = document.createElement('img');
+  // imgEl1.id = 'image1';
+  // sectionEl.appendChild(imgEl1);
+
+  // imgEl2 = document.createElement('img');
+  // imgEl2.id = 'image2';
+  // sectionEl.appendChild(imgEl2);
+
+  // imgEl3 = document.createElement('img');
+  // imgEl3.id = 'image3';
+  // sectionEl.appendChild(imgEl3);
+
+  // tranCurrToPrev();
+  // setImgFilepath();
+
+  // Item.totalNumOfClicks += 1;
+}
+
+
+
+function storeData(){
+  console.log('heloo storing data');
+  if(Item.cumulativeTotalNumOfClicks === 0 && Item.cumulativeTotalNumOfClicks.length === 0){
+    localStorage.setItem('storedItem', JSON.stringify(Item.objStore));
+    localStorage.setItem('storedTotalClicks', Item.totalNumOfClicks);
+  }else{
+    localStorage.setItem('storedItem', JSON.stringify(Item.cumulativeObjStore));
+    localStorage.setItem('storedTotalClicks', Item.cumulativeTotalNumOfClicks);
+  }
+}
+
 
 initialLoading();
 addEventListenerToSection();
