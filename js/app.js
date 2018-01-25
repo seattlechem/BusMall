@@ -1,16 +1,22 @@
 'use strict';
 
-var prevNum = [];
-var currNum = [];
-var objStore = [];
-var isSame = false;
+
+Item.prevNum = [];
+Item.currNum = [];
+Item.objStore = [];
+Item.cumulativeObjStore = [];
+Item.isSame = false;
 var sectionEl = document.getElementById('pictureContainer');
 var imgEl1 = document.getElementById('image1');
 var imgEl2 = document.getElementById('image2');
 var imgEl3 = document.getElementById('image3');
-var totalNumOfClicks = 0;
+Item.totalNumOfClicks = 0;
+Item.cumulativeTotalNumOfClicks = 0;
 var percentClickPerItemArray = [];
 
+if(localStorage.getItem('storedItem')){
+  retrieveData();
+}
 
 var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
@@ -21,7 +27,7 @@ function Item(name, filepath, id){
   this.id = id;
   this.numDisplayed = 0;
   this.numClicked = 0;
-  objStore.push(this);
+  Item.objStore.push(this);
 }
 
 //
@@ -33,30 +39,15 @@ function creatingObjets(){
   }
 }
 
-function pickInitialNum(){
-  for(var i = 0; i < 3; i++){
-    isSame = false;
-    while(isSame === false){
-      var randomNum = Math.floor(Math.random() * stockImages.length);
-      if(currNum.includes(randomNum) === false){
-        currNum.push(randomNum);
-        isSame = true;
-      }
-    }
-  }
-}
-
-//the current isSame is false
 
 //compare function
 function compare(num){
-  if(prevNum.includes(num) === false && currNum.includes(num) === false){
-    currNum.push(num);
-    objStore[num].numDisplayed += 1;
-
-    isSame = true;
+  if(Item.prevNum.includes(num) === false && Item.currNum.includes(num) === false){
+    Item.currNum.push(num);
+    Item.objStore[num].numDisplayed += 1;
+    Item.isSame = true;
   }else{
-    isSame = false;
+    Item.isSame = false;
   }
 }
 
@@ -64,43 +55,43 @@ function compare(num){
 //pick first initial num
 
 function pickRandomNum(){
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     var randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  isSame = false;
-  while(isSame === false){
+  Item.isSame = false;
+  while(Item.isSame === false){
     randomNum = Math.floor(Math.random() * stockImages.length);
     compare(randomNum);
   }
-  console.log(currNum);
+  console.log(Item.currNum);
 }
 
-//assigning currNum to prevNum
+//assigning Item.currNumItem.prevNum
 function tranCurrToPrev(){
   for(var i = 0; i < 3; i++){
-    prevNum[i] = currNum[i];
+    Item.prevNum[i] = Item.currNum[i];
   }
   if(i === 3){
-    currNum = [];
+    Item.currNum = [];
   }
 
 }
 
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
-  imgEl1.src = objStore[prevNum[0]].filepath;
-  imgEl1.alt = objStore[prevNum[0]].name;
-  imgEl2.src = objStore[prevNum[1]].filepath;
-  imgEl2.alt = objStore[prevNum[1]].name;
-  imgEl3.src = objStore[prevNum[2]].filepath;
-  imgEl3.alt = objStore[prevNum[2]].name;
+  imgEl1.src = Item.objStore[Item.prevNum[0]].filepath;
+  imgEl1.alt = Item.objStore[Item.prevNum[0]].name;
+  imgEl2.src = Item.objStore[Item.prevNum[1]].filepath;
+  imgEl2.alt = Item.objStore[Item.prevNum[1]].name;
+  imgEl3.src = Item.objStore[Item.prevNum[2]].filepath;
+  imgEl3.alt = Item.objStore[Item.prevNum[2]].name;
 }
 
 function initialLoading(){
@@ -121,25 +112,27 @@ function imgClickEvent(event){
   pickRandomNum();
   tranCurrToPrev();
   setImgFilepath();
-  totalNumOfClicks += 1;
-  applyEachImgCount();
+  Item.totalNumOfClicks += 1;
+  applyEachImgCount(event);
 
-  if(totalNumOfClicks > 3){
+  if(Item.totalNumOfClicks > 3){
+    storeData();
+    console.log('storeData invoked');
     sectionEl.removeEventListener('click', imgClickEvent);
     console.log('reached 25 clicks');
     sectionEl.innerHTML = '';
     percetClickPerItem();
-    showTable();
+    // showTable();
     showChart();
-    // displayResetBtn();
+    displayResetBtn();
   }
 
 }
 
-function applyEachImgCount(){
-  for(var i = 0; i < objStore.length; i++){
-    if(event.target.alt === objStore[i].name){
-      objStore[i].numClicked += 1;
+function applyEachImgCount(event){
+  for(var i = 0; i < Item.objStore.length; i++){
+    if(event.target.alt === Item.objStore[i].name){
+      Item.objStore[i].numClicked += 1;
     }
   }
 }
@@ -162,15 +155,15 @@ function showTable(){
   tableEl.appendChild(trEl);
   sectionEl.appendChild(tableEl);
 
-  for(var i in objStore){
+  for(var i in Item.objStore){
     trEl = document.createElement('tr');
     var tdEl1 = document.createElement('td');
     var tdEl2 = document.createElement('td');
     var tdEl3 = document.createElement('td');
 
     tdEl1.textContent = i;
-    tdEl2.textContent = objStore[i].name;
-    var percentageOfClicks = (objStore[i].numClicked) / (totalNumOfClicks) * 100;
+    tdEl2.textContent = Item.objStore[i].name;
+    var percentageOfClicks = (Item.objStore[i].numClicked) / (Item.totalNumOfClicks) * 100;
     if(percentageOfClicks === 0){
       tdEl3.textContent = percentageOfClicks;
     }
@@ -191,13 +184,20 @@ function showTable(){
 }
 
 function percetClickPerItem(){
-  for(var i in objStore){
-    var calc = objStore[i].numClicked / totalNumOfClicks * 100;
-    percentClickPerItemArray.push(calc);
-    console.log(calc);
-
+  if(Item.cumulativeObjStore.length === 0 & Item.cumulativeTotalNumOfClicks === 0){
+    for(var i in Item.objStore){
+      var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
+      percentClickPerItemArray.push(calc);
+    }
+  }else{
+    for(i in Item.objStore){
+      calc = Item.cumulativeObjStore[i].numClicked / Item.cumulativeTotalNumOfClicks * 100;
+      percentClickPerItemArray.push(calc);
+    }
   }
+
 }
+
 
 function showChart(){
   var canvasEl = document.createElement('canvas');
@@ -247,46 +247,57 @@ function showChart(){
 function displayResetBtn(){
   var resetBtn = document.createElement('button');
   resetBtn.innerHTML = 'Try Again';
-  resetBtn.onclick = reset();
+  resetBtn.addEventListener('click', reset);
   sectionEl.appendChild(resetBtn);
 }
 
 function reset(){
-  sectionEl.innerHTML = '';
-  var imageEl1 = document.createElement('img');
-  imageEl1.id = 'image1';
+  console.log('reset');
 
-  var imageEl2 = document.createElement('img');
-  imageEl2.id = 'image1';
-
-  var imageEl3 = document.createElement('img');
-  imageEl3.id = 'image1';
-
-
-
-  pickRandomNum();
-  tranCurrToPrev();
-
-  setImgFilepath();
-  totalNumOfClicks += 1;
-
-  // for(i = 0; i < objStore.length; i++){
-  //   if(event.target.alt === objStore[i].name){
-  //     objStore[i].numClicked += 1;
-  //   }
-  // }
-
-  // if(totalNumOfClicks > 5){
-  //   sectionEl.removeEventListener('click', imgClickEvent);
-  //   console.log('reached 25 clicks');
-  //   sectionEl.innerHTML = '';
-  //   // showTable();
-  //   percetClickPerItem();
-  //   showChart();
-  //   displayResetBtn();
-  // }
-
+  location.reload();
 }
+
+function retrieveData(){
+  Item.cumulativeObjStore = JSON.parse(localStorage.getItem('storedItem'));
+  console.log('Hello retrievedata');
+  Item.cumulativeTotalNumOfClicks = JSON.parse(localStorage.getItem('storedTotalClicks'));
+
+  // localStorage.clear('storedItem');
+  // localStorage.clear('storedTotalClicks');
+
+  // sectionEl.innerHTML = '';
+
+  // imgEl1 = document.createElement('img');
+  // imgEl1.id = 'image1';
+  // sectionEl.appendChild(imgEl1);
+
+  // imgEl2 = document.createElement('img');
+  // imgEl2.id = 'image2';
+  // sectionEl.appendChild(imgEl2);
+
+  // imgEl3 = document.createElement('img');
+  // imgEl3.id = 'image3';
+  // sectionEl.appendChild(imgEl3);
+
+  // tranCurrToPrev();
+  // setImgFilepath();
+
+  // Item.totalNumOfClicks += 1;
+}
+
+
+
+function storeData(){
+  console.log('heloo storing data');
+  if(Item.cumulativeTotalNumOfClicks === 0 && Item.cumulativeTotalNumOfClicks.length === 0){
+    localStorage.setItem('storedItem', JSON.stringify(Item.objStore));
+    localStorage.setItem('storedTotalClicks', Item.totalNumOfClicks);
+  }else{
+    localStorage.setItem('storedItem', JSON.stringify(Item.cumulativeObjStore));
+    localStorage.setItem('storedTotalClicks', Item.cumulativeTotalNumOfClicks);
+  }
+}
+
 
 initialLoading();
 addEventListenerToSection();
