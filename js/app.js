@@ -4,19 +4,24 @@
 Item.prevNum = [];
 Item.currNum = [];
 Item.objStore = [];
-Item.cumulativeObjStore = [];
-Item.isSame = false;
-var sectionEl = document.getElementById('pictureContainer');
-var imgEl1 = document.getElementById('image1');
-var imgEl2 = document.getElementById('image2');
-var imgEl3 = document.getElementById('image3');
-Item.totalNumOfClicks = 0;
-Item.cumulativeTotalNumOfClicks = 0;
-var percentClickPerItemArray = [];
+Item.cumIndiItemClick = [];
 
-if(localStorage.getItem('storedItem')){
-  retrieveData();
+Item.sectionEl = document.getElementById('pictureContainer');
+Item.imgEl1 = document.getElementById('image1');
+Item.imgEl2 = document.getElementById('image2');
+Item.imgEl3 = document.getElementById('image3');
+Item.totalNumOfClicks = 0;
+
+if(localStorage.storedItem && localStorage.storedTotalClicks){
+  Item.cumObjStore = JSON.parse(localStorage.getItem('storedItem'));
+  Item.cumTotalNumOfClicks = JSON.parse(localStorage.getItem('storedTotalClicks'));
+}else{
+  Item.objStore = [];
+  Item.cumObjStore = Item.objStore;
+  Item.cumTotalNumOfClicks = 0;
 }
+
+Item.percentClickPerItemArray = [];
 
 var stockImages = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
@@ -32,22 +37,19 @@ function Item(name, filepath, id){
 
 //
 function creatingObjets(){
-  //using for loop create 20 objects
   for(var i in stockImages){
     var filepath = 'img/' + stockImages[i] + '.jpg';
     new Item(stockImages[i], filepath, i);
   }
 }
 
-
-//compare function
 function compare(num){
   if(Item.prevNum.includes(num) === false && Item.currNum.includes(num) === false){
     Item.currNum.push(num);
     Item.objStore[num].numDisplayed += 1;
-    Item.isSame = true;
+    return true;
   }else{
-    Item.isSame = false;
+    return false;
   }
 }
 
@@ -55,22 +57,13 @@ function compare(num){
 //pick first initial num
 
 function pickRandomNum(){
-  Item.isSame = false;
-  while(Item.isSame === false){
-    var randomNum = Math.floor(Math.random() * stockImages.length);
-    compare(randomNum);
+  for(var i = 0; i < 3; i++){
+    var isSame = false;
+    while(!isSame){
+      var randomNum = Math.floor(Math.random() * stockImages.length);
+      isSame = compare(randomNum);
+    }
   }
-  Item.isSame = false;
-  while(Item.isSame === false){
-    randomNum = Math.floor(Math.random() * stockImages.length);
-    compare(randomNum);
-  }
-  Item.isSame = false;
-  while(Item.isSame === false){
-    randomNum = Math.floor(Math.random() * stockImages.length);
-    compare(randomNum);
-  }
-  console.log(Item.currNum);
 }
 
 //assigning Item.currNumItem.prevNum
@@ -86,12 +79,12 @@ function tranCurrToPrev(){
 
 //set filepathg of image1, image2, and image3
 function setImgFilepath(){
-  imgEl1.src = Item.objStore[Item.prevNum[0]].filepath;
-  imgEl1.alt = Item.objStore[Item.prevNum[0]].name;
-  imgEl2.src = Item.objStore[Item.prevNum[1]].filepath;
-  imgEl2.alt = Item.objStore[Item.prevNum[1]].name;
-  imgEl3.src = Item.objStore[Item.prevNum[2]].filepath;
-  imgEl3.alt = Item.objStore[Item.prevNum[2]].name;
+  Item.imgEl1.src = Item.objStore[Item.prevNum[0]].filepath;
+  Item.imgEl1.alt = Item.objStore[Item.prevNum[0]].name;
+  Item.imgEl2.src = Item.objStore[Item.prevNum[1]].filepath;
+  Item.imgEl2.alt = Item.objStore[Item.prevNum[1]].name;
+  Item.imgEl3.src = Item.objStore[Item.prevNum[2]].filepath;
+  Item.imgEl3.alt = Item.objStore[Item.prevNum[2]].name;
 }
 
 function initialLoading(){
@@ -104,7 +97,7 @@ function initialLoading(){
 
 function addEventListenerToSection(){
   //only 1 eventlistener
-  sectionEl.addEventListener('click', imgClickEvent);
+  Item.sectionEl.addEventListener('click', imgClickEvent);
 }
 
 function imgClickEvent(event){
@@ -115,14 +108,11 @@ function imgClickEvent(event){
   Item.totalNumOfClicks += 1;
   applyEachImgCount(event);
 
-  if(Item.totalNumOfClicks > 3){
+  if(Item.totalNumOfClicks > 24){
+    extractNumClicks();
     storeData();
-    console.log('storeData invoked');
-    sectionEl.removeEventListener('click', imgClickEvent);
-    console.log('reached 25 clicks');
-    sectionEl.innerHTML = '';
-    percetClickPerItem();
-    // showTable();
+    percentClickPerItem();
+    showTable();
     showChart();
     displayResetBtn();
   }
@@ -139,63 +129,53 @@ function applyEachImgCount(event){
 
 function showTable(){
   //table, tr, th
-  var tableEl = document.createElement('table');
-  var trEl = document.createElement('tr');
-  var thEl1 = document.createElement('th');
-  var thEl2 = document.createElement('th');
-  var thEl3 = document.createElement('th');
+  Item.tableEl = document.createElement('table');
+  Item.trEl = document.createElement('tr');
+  Item.thEl1 = document.createElement('th');
+  Item.thEl2 = document.createElement('th');
+  Item.thEl3 = document.createElement('th');
 
-  thEl1.textContent = 'No.';
-  thEl2.textContent = 'Item Name';
-  thEl3.textContent = '% of Clicks';
+  Item.thEl1.textContent = 'No.';
+  Item.thEl2.textContent = 'Item Name';
+  Item.thEl3.textContent = '% of Clicks';
 
-  trEl.appendChild(thEl1);
-  trEl.appendChild(thEl2);
-  trEl.appendChild(thEl3);
-  tableEl.appendChild(trEl);
-  sectionEl.appendChild(tableEl);
+  Item.trEl.appendChild(Item.thEl1);
+  Item.trEl.appendChild(Item.thEl2);
+  Item.trEl.appendChild(Item.thEl3);
+  Item.tableEl.appendChild(Item.trEl);
+  Item.sectionEl.appendChild(Item.tableEl);
 
   for(var i in Item.objStore){
-    trEl = document.createElement('tr');
-    var tdEl1 = document.createElement('td');
-    var tdEl2 = document.createElement('td');
-    var tdEl3 = document.createElement('td');
+    Item.trEl = document.createElement('tr');
+    Item.tdEl1 = document.createElement('td');
+    Item.tdEl2 = document.createElement('td');
+    Item.tdEl3 = document.createElement('td');
 
-    tdEl1.textContent = i;
-    tdEl2.textContent = Item.objStore[i].name;
-    var percentageOfClicks = (Item.objStore[i].numClicked) / (Item.totalNumOfClicks) * 100;
+    Item.tdEl1.textContent = i;
+    Item.tdEl2.textContent = Item.objStore[i].name;
+    var percentageOfClicks = Item.percentClickPerItemArray[i];
     if(percentageOfClicks === 0){
-      tdEl3.textContent = percentageOfClicks;
+      Item.tdEl3.textContent = percentageOfClicks;
     }
     else{
-      tdEl3.textContent = percentageOfClicks.toFixed(2) + '%';
+      Item.tdEl3.textContent = percentageOfClicks.toFixed(2) + '%';
     }
 
-    trEl.appendChild(tdEl1);
-    trEl.appendChild(tdEl2);
-    trEl.appendChild(tdEl3);
+    Item.trEl.appendChild(Item.tdEl1);
+    Item.trEl.appendChild(Item.tdEl2);
+    Item.trEl.appendChild(Item.tdEl3);
 
-    tableEl.appendChild(trEl);
-    sectionEl.appendChild(tableEl);
-
-
+    Item.tableEl.appendChild(Item.trEl);
+    Item.sectionEl.appendChild(Item.tableEl);
   }
-  //tr, td
 }
 
-function percetClickPerItem(){
-  if(Item.cumulativeObjStore.length === 0 & Item.cumulativeTotalNumOfClicks === 0){
-    for(var i in Item.objStore){
-      var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
-      percentClickPerItemArray.push(calc);
-    }
-  }else{
-    for(i in Item.objStore){
-      calc = Item.cumulativeObjStore[i].numClicked / Item.cumulativeTotalNumOfClicks * 100;
-      percentClickPerItemArray.push(calc);
-    }
-  }
+function percentClickPerItem(){
 
+  for(var i in Item.objStore){
+    var calc = Item.objStore[i].numClicked / Item.totalNumOfClicks * 100;
+    Item.percentClickPerItemArray.push(calc);
+  }
 }
 
 
@@ -203,29 +183,17 @@ function showChart(){
   var canvasEl = document.createElement('canvas');
   canvasEl.getContext('2d');
 
-  var itemChart = new Chart(canvasEl, {
+  new Chart(canvasEl, {
     type: 'bar',
     data: {
       labels: stockImages,
       datasets: [{
-        label: 'Percentage of Clicks Per Item', //chart title
-        data: percentClickPerItemArray,
-        backgroundColor: [
+        label: 'Num of Clicks Per Item', //chart title
+        data: Item.cumIndiItemClick,
+        backgroundColor:
           'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255,99,132,1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-        ],
+        borderColor:
+          'rgba(255, 159, 64, 1)',
         borderWidth: 1
       }]
     },
@@ -240,15 +208,17 @@ function showChart(){
     }
 
   });
-  sectionEl.appendChild(canvasEl);
+  Item.sectionEl.appendChild(canvasEl);
 
 }
 
 function displayResetBtn(){
+  Item.sectionEl.removeEventListener('click', imgClickEvent);
+  // sectionEl.innerHTML = '';
   var resetBtn = document.createElement('button');
   resetBtn.innerHTML = 'Try Again';
   resetBtn.addEventListener('click', reset);
-  sectionEl.appendChild(resetBtn);
+  Item.sectionEl.appendChild(resetBtn);
 }
 
 function reset(){
@@ -257,47 +227,24 @@ function reset(){
   location.reload();
 }
 
-function retrieveData(){
-  Item.cumulativeObjStore = JSON.parse(localStorage.getItem('storedItem'));
-  console.log('Hello retrievedata');
-  Item.cumulativeTotalNumOfClicks = JSON.parse(localStorage.getItem('storedTotalClicks'));
+function storeData(){
+  console.log(Item.cumObjStore);
+  for(var i in Item.cumObjStore){
+    Item.cumObjStore[i].numDisplayed += Item.objStore[i].numDisplayed;
+    Item.cumObjStore[i].numClicked += Item.objStore[i].numClicked;
+  }
+  Item.cumTotalNumOfClicks += Item.totalNumOfClicks;
 
-  // localStorage.clear('storedItem');
-  // localStorage.clear('storedTotalClicks');
-
-  // sectionEl.innerHTML = '';
-
-  // imgEl1 = document.createElement('img');
-  // imgEl1.id = 'image1';
-  // sectionEl.appendChild(imgEl1);
-
-  // imgEl2 = document.createElement('img');
-  // imgEl2.id = 'image2';
-  // sectionEl.appendChild(imgEl2);
-
-  // imgEl3 = document.createElement('img');
-  // imgEl3.id = 'image3';
-  // sectionEl.appendChild(imgEl3);
-
-  // tranCurrToPrev();
-  // setImgFilepath();
-
-  // Item.totalNumOfClicks += 1;
+  localStorage.setItem('storedItem', JSON.stringify(Item.cumObjStore));
+  localStorage.setItem('storedTotalClicks', JSON.stringify(Item.cumTotalNumOfClicks));
 }
 
-
-
-function storeData(){
-  console.log('heloo storing data');
-  if(Item.cumulativeTotalNumOfClicks === 0 && Item.cumulativeTotalNumOfClicks.length === 0){
-    localStorage.setItem('storedItem', JSON.stringify(Item.objStore));
-    localStorage.setItem('storedTotalClicks', Item.totalNumOfClicks);
-  }else{
-    localStorage.setItem('storedItem', JSON.stringify(Item.cumulativeObjStore));
-    localStorage.setItem('storedTotalClicks', Item.cumulativeTotalNumOfClicks);
+function extractNumClicks(){
+  for(var i in Item.cumObjStore){
+    Item.cumIndiItemClick.push(Item.cumObjStore[i].numClicked);
+    
   }
 }
-
 
 initialLoading();
 addEventListenerToSection();
